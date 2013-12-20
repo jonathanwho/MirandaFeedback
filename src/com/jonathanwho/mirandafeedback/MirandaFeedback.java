@@ -266,8 +266,7 @@ public class MirandaFeedback {
 
             // Builds body of the email
             body.append("<table>");
-            body.append("<tr><td><b>Feedback</b></td><td>" + feedback.getText().toString()
-               + "</td></tr>");
+            body.append(String.format(tableRowFormat, "Feedback", feedback.getText().toString()));
             for (ViewGroup layout : viewFields) {
                fieldLabel = ((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString();
                userInput = ((EditText) layout.getChildAt(FIELD_INPUT)).getText().toString();
