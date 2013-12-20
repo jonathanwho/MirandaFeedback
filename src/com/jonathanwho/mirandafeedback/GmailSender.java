@@ -54,11 +54,11 @@ public class GmailSender extends javax.mail.Authenticator {
    }
 
    public synchronized void sendMail(String subject, String body, String sender, String recipients)
-         throws Exception {
+      throws Exception {
       try {
          MimeMessage message = new MimeMessage(session);
-         DataHandler handler = new DataHandler(new ByteArrayDataSource(body.getBytes(),
-               "text/plain"));
+         DataHandler handler =
+            new DataHandler(new ByteArrayDataSource(body.getBytes(), "text/html"));
          message.setSender(new InternetAddress(sender));
          message.setSubject(subject);
          message.setDataHandler(handler);

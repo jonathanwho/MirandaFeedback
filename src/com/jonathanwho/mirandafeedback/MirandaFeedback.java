@@ -181,6 +181,7 @@ public class MirandaFeedback {
       private static final String REQUIRED_FIELD_ERROR = "This field is required.";
       private static final String UNKNOWN_ERROR = "An unknown error occurred.";
       private static final String SUCCESSFUL_MSG = "Thank you for your feedback!";
+      private final String PROGRESS_MSG = "Sending feedback...";
 
       /**
        * Construct a new FeedbackDialog.
@@ -258,20 +259,25 @@ public class MirandaFeedback {
             // required field is left blank
             feedback.setError(REQUIRED_FIELD_ERROR);
          } else {
-            // Builds body of the email
-            StringBuilder subject = new StringBuilder();
-            subject.append("Feedback:\n\t" + feedback.getText().toString() + "\n\n");
+            StringBuilder body = new StringBuilder();
+            String fieldLabel;
+            String userInput;
+            String tableRowFormat = "<tr><td><b>%s</b></td><td>%s</td></tr>";
 
+            // Builds body of the email
+            body.append("<table>");
+            body.append("<tr><td><b>Feedback</b></td><td>" + feedback.getText().toString()
+               + "</td></tr>");
             for (ViewGroup layout : viewFields) {
-               subject.append(((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString()
-                  + "\n\t" + ((EditText) layout.getChildAt(FIELD_INPUT)).getText().toString()
-                  + "\n");
+               fieldLabel = ((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString();
+               userInput = ((EditText) layout.getChildAt(FIELD_INPUT)).getText().toString();
+               body.append(String.format(tableRowFormat, fieldLabel, userInput));
             }
+            body.append("</table>");
 
             // sends feedback to |gmailRecipient|
             new AsyncTask<String, Void, Boolean>() {
                ProgressDialog progressDialog;
-               private final String PROGRESS_MSG = "Sending feedback...";
 
                @Override
                protected void onPreExecute() {
@@ -305,7 +311,7 @@ public class MirandaFeedback {
                      Toast.makeText(getActivity(), UNKNOWN_ERROR, Toast.LENGTH_LONG).show();
                   }
                }
-            }.execute(subject.toString());
+            }.execute(body.toString());
          }
       }
    }
