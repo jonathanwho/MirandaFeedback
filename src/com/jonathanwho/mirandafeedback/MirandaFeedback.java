@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,13 +24,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jonathanwho.mail.GmailSender;
+
 /**
  * MirandaFeedback is wrapper class that creates a user-customizable feedback 
  * form that allows you to easily recieve feedback on your app via a Gmail
  * account. Adding multiple custom attributes is as easy as a few method calls.
  * 
  * @author Jonathan Miranda of jonathanwho.com
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class MirandaFeedback {
    /** Name of the app */
@@ -46,6 +49,8 @@ public class MirandaFeedback {
    private FragmentManager fragmentManager;
    /** The wrapped DialogFragment */
    private FeedbackDialog dialog;
+   /** True if the feedback email will be sent via plain text (versus default HTML) */
+   private boolean textEmail;
 
    /** Constants used for the dialog's arguments */
    private final static String APP_NAME = "APP_NAME";
@@ -53,6 +58,11 @@ public class MirandaFeedback {
    private final static String NEG_BUTTON = "NEG_BUTTON";
    private final static String DIALOG_TITLE = "DIALOG_TITLE";
    private final static String ADDED_FIELDS = "ADDED_FIELDS";
+   private final static String TEXT_EMAIL = "TEXT_EMAIL";
+
+   /** Text for dialog buttons */
+   private final static String POS_BUTTON_TXT = "Send";
+   private final static String NEG_BUTTON_TXT = "Cancel";
 
    /** Gmail account information */
    /** google email account username (include @gmail.com) */
@@ -70,8 +80,8 @@ public class MirandaFeedback {
     */
    public MirandaFeedback(Context context) {
       this.fields = new ArrayList<String>();
-      this.positiveButtonText = "Send";
-      this.negativeButtonText = "Cancel";
+      this.positiveButtonText = POS_BUTTON_TXT;
+      this.negativeButtonText = NEG_BUTTON_TXT;
       this.fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
       this.dialog = new FeedbackDialog();
    }
@@ -145,6 +155,16 @@ public class MirandaFeedback {
    }
 
    /**
+    * Determines how to send the feedback email to |gmailRecipient|.
+    * @param textEmail If true, feedback email is sent via plain text. HTML otherwise.
+    * @return
+    */
+   public MirandaFeedback setTextEmail(boolean textEmail) {
+      this.textEmail = textEmail;
+      return this;
+   }
+
+   /**
     * Sets arguments and displays the feedback dialog.
     * @throws MirandaNoEmailException
     */
@@ -158,6 +178,7 @@ public class MirandaFeedback {
       arguments.putString(POS_BUTTON, positiveButtonText);
       arguments.putString(NEG_BUTTON, negativeButtonText);
       arguments.putString(DIALOG_TITLE, dialogTitle);
+      arguments.putBoolean(TEXT_EMAIL, textEmail);
       arguments.putStringArrayList(ADDED_FIELDS, fields);
       dialog.setArguments(arguments);
       dialog.show(fragmentManager, "feedback_dialog");
@@ -173,6 +194,8 @@ public class MirandaFeedback {
       private List<ViewGroup> viewFields;
       /** Holds the text from the feedback form */
       private EditText feedback;
+      /** Holds the format of the email. True: text/plain False: text/html*/
+      private boolean textEmail;
 
       private static final int FIELD_TEXT = 0;
       private static final int FIELD_INPUT = 1;
@@ -200,6 +223,7 @@ public class MirandaFeedback {
          String positiveButtonText = arguments.getString(POS_BUTTON);
          String negativeButtonText = arguments.getString(NEG_BUTTON);
          String dialogTitle = arguments.getString(DIALOG_TITLE);
+         textEmail = arguments.getBoolean(TEXT_EMAIL);
          ArrayList<String> fields = arguments.getStringArrayList(ADDED_FIELDS);
 
          // Gets the title for the dialog
@@ -241,8 +265,114 @@ public class MirandaFeedback {
       }
 
       /**
-       * Creates the email that will be sent to the recipient of this feedback
-       * input.
+       * Formats the feedback response into a properly formatted HTML email:
+       * 
+       * _____________________________________
+       * |{Feedback Label} | {Feedback Input}|
+       * _____________________________________
+       * |{Feedback Label} | {Feedback Input}|
+       * _____________________________________
+       * 
+       * @return Feedback input as HTML.
+       */
+      public String formattedHtmlEmail() {
+         StringBuilder body = new StringBuilder();
+         String fieldLabel;
+         String userInput;
+         String tableRowFormat = "<tr><td><b>%s</b></td><td>%s</td></tr>";
+
+         // Builds body of the email
+         body.append("<table>");
+         body.append(String.format(tableRowFormat, "Feedback", feedback.getText().toString()));
+         for (ViewGroup layout : viewFields) {
+            fieldLabel = ((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString();
+            userInput = ((EditText) layout.getChildAt(FIELD_INPUT)).getText().toString();
+            // Strip input
+            fieldLabel = Html.fromHtml(fieldLabel).toString();
+            userInput = Html.fromHtml(userInput).toString();
+            body.append(String.format(tableRowFormat, fieldLabel, userInput));
+         }
+         body.append("</table>");
+         return body.toString();
+      }
+
+      /**
+       * Formats the feedback response into a plain text email in the form:
+       * 
+       * {Fieldback Label}:
+       *    {Feedback Input}
+       * {Fieldback Label}:
+       *    {Feedback Input}
+       * 
+       * @return Feedback input as plain text.
+       */
+      public String formattedPlainTextEmail() {
+         StringBuilder body = new StringBuilder();
+         String fieldLabel;
+         String userInput;
+
+         // Builds body of the email
+         body.append("Feedback:" + "\n\t" + feedback.getText().toString() + "\n");
+         for (ViewGroup layout : viewFields) {
+            fieldLabel = ((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString();
+            userInput = ((EditText) layout.getChildAt(FIELD_INPUT)).getText().toString();
+            // Strip input
+            fieldLabel = Html.fromHtml(fieldLabel).toString();
+            userInput = Html.fromHtml(userInput).toString();
+            body.append(fieldLabel + ":\n\t" + userInput + "\n");
+         }
+         return body.toString();
+      }
+
+      /**
+       * Sends the feedback form input using the Gmail credentials.
+       *  
+       * @param email The body of the email message.
+       */
+      public void sendEmail(String email) {
+         // sends feedback to |gmailRecipient|
+         new AsyncTask<String, Void, Boolean>() {
+            ProgressDialog progressDialog;
+
+            @Override
+            protected void onPreExecute() {
+               super.onPreExecute();
+               progressDialog = new ProgressDialog(getActivity());
+               progressDialog.setMessage(PROGRESS_MSG);
+               progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+               progressDialog.setProgress(0);
+               progressDialog.show();
+            }
+
+            @Override
+            protected Boolean doInBackground(String... subject) {
+               GmailSender sender = new GmailSender(gmailUsername, gmailPassword, textEmail);
+               try {
+                  sender.sendMail(gmailSubject, subject[0], gmailUsername, gmailRecipient);
+                  return true;
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+               return false;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean sent) {
+               progressDialog.dismiss();
+               if (sent) {
+                  Toast.makeText(getActivity(), SUCCESSFUL_MSG, Toast.LENGTH_LONG).show();
+                  getDialog().dismiss();
+               } else {
+                  Toast.makeText(getActivity(), UNKNOWN_ERROR, Toast.LENGTH_LONG).show();
+               }
+            }
+         }.execute(email);
+      }
+
+      /**
+       * Verifies network connection and feedback input fields.
+       * If everything is valid, it attemps to send the email
+       * Else displays a relevant error.
        * 
        * This method is called when the user clicks on the dialog's positive
        * button.
@@ -259,58 +389,7 @@ public class MirandaFeedback {
             // required field is left blank
             feedback.setError(REQUIRED_FIELD_ERROR);
          } else {
-            StringBuilder body = new StringBuilder();
-            String fieldLabel;
-            String userInput;
-            String tableRowFormat = "<tr><td><b>%s</b></td><td>%s</td></tr>";
-
-            // Builds body of the email
-            body.append("<table>");
-            body.append(String.format(tableRowFormat, "Feedback", feedback.getText().toString()));
-            for (ViewGroup layout : viewFields) {
-               fieldLabel = ((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString();
-               userInput = ((EditText) layout.getChildAt(FIELD_INPUT)).getText().toString();
-               body.append(String.format(tableRowFormat, fieldLabel, userInput));
-            }
-            body.append("</table>");
-
-            // sends feedback to |gmailRecipient|
-            new AsyncTask<String, Void, Boolean>() {
-               ProgressDialog progressDialog;
-
-               @Override
-               protected void onPreExecute() {
-                  super.onPreExecute();
-                  progressDialog = new ProgressDialog(getActivity());
-                  progressDialog.setMessage(PROGRESS_MSG);
-                  progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                  progressDialog.setProgress(0);
-                  progressDialog.show();
-               }
-
-               @Override
-               protected Boolean doInBackground(String... subject) {
-                  GmailSender sender = new GmailSender(gmailUsername, gmailPassword);
-                  try {
-                     sender.sendMail(gmailSubject, subject[0], gmailUsername, gmailRecipient);
-                     return true;
-                  } catch (Exception e) {
-                     e.printStackTrace();
-                  }
-                  return false;
-               }
-
-               @Override
-               protected void onPostExecute(Boolean sent) {
-                  progressDialog.dismiss();
-                  if (sent) {
-                     Toast.makeText(getActivity(), SUCCESSFUL_MSG, Toast.LENGTH_LONG).show();
-                     getDialog().dismiss();
-                  } else {
-                     Toast.makeText(getActivity(), UNKNOWN_ERROR, Toast.LENGTH_LONG).show();
-                  }
-               }
-            }.execute(body.toString());
+            sendEmail(textEmail ? formattedPlainTextEmail() : formattedHtmlEmail());
          }
       }
    }
