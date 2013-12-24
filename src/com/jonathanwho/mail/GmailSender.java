@@ -1,4 +1,4 @@
-package com.jonathanwho.mirandafeedback;
+package com.jonathanwho.mail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,14 +27,19 @@ public class GmailSender extends javax.mail.Authenticator {
    private String user;
    private String password;
    private Session session;
+   private String emailFormat;
+
+   private final String HTML_EMAIL = "text/html";
+   private final String TEXT_EMAIL = "text/plain";
 
    static {
       Security.addProvider(new JSSEProvider());
    }
 
-   public GmailSender(String user, String password) {
+   public GmailSender(String user, String password, boolean textEmail) {
       this.user = user;
       this.password = password;
+      emailFormat = textEmail ? TEXT_EMAIL : HTML_EMAIL;
 
       Properties props = new Properties();
       props.setProperty("mail.transport.protocol", "smtp");
@@ -58,7 +63,7 @@ public class GmailSender extends javax.mail.Authenticator {
       try {
          MimeMessage message = new MimeMessage(session);
          DataHandler handler =
-            new DataHandler(new ByteArrayDataSource(body.getBytes(), "text/html"));
+            new DataHandler(new ByteArrayDataSource(body.getBytes(), emailFormat));
          message.setSender(new InternetAddress(sender));
          message.setSubject(subject);
          message.setDataHandler(handler);
