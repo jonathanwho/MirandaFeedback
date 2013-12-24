@@ -1,9 +1,4 @@
-package com.jonathanwho.mirandafeedback;
-
-import com.jonathanwho.mirandafeedback.MirandaFeedback;
-import com.jonathanwho.mirandafeedback.R;
-import com.jonathanwho.mirandafeedback.R.id;
-import com.jonathanwho.mirandafeedback.R.layout;
+package com.jonathanwho.mirandafeedback.demo;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -14,6 +9,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+
+import com.jonathanwho.mirandafeedback.MirandaFeedback;
+import com.jonathanwho.mirandafeedback.R;
 
 public class MirandaDemo extends FragmentActivity implements OnClickListener {
 
