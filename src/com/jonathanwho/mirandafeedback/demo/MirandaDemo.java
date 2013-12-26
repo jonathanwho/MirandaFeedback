@@ -24,6 +24,8 @@ public class MirandaDemo extends FragmentActivity implements OnClickListener {
    EditText mDialogTitle;
 
    private final String REQUIRED_FIELD = "This field is required.";
+   private final String INVALID_EMAIL = "This is not a valid email";
+
    private final String GMAIL_ACCOUNT = "GMAIL_ACCOUNT";
    private final String GMAIL_PW = "GMAIL_PW";
    private final String APP_NAME = "APP_NAME";
@@ -59,6 +61,8 @@ public class MirandaDemo extends FragmentActivity implements OnClickListener {
 
       if (email.isEmpty())
          mEmail.setError(REQUIRED_FIELD);
+      else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
+         mEmail.setError(INVALID_EMAIL);
       else if (password.isEmpty())
          mPassword.setError(REQUIRED_FIELD);
       else {
