@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
@@ -22,6 +23,9 @@ public class MirandaDemo extends FragmentActivity implements OnClickListener {
 
    EditText mAppName;
    EditText mDialogTitle;
+
+   CheckBox mOptName;
+   CheckBox mOptEmail;
 
    private final String REQUIRED_FIELD = "This field is required.";
    private final String INVALID_EMAIL = "This is not a valid email";
@@ -42,6 +46,8 @@ public class MirandaDemo extends FragmentActivity implements OnClickListener {
       mEmailType = (RadioGroup) findViewById(R.id.email_type);
       mAppName = (EditText) findViewById(R.id.app_name);
       mDialogTitle = (EditText) findViewById(R.id.dialog_title);
+      mOptName = (CheckBox) findViewById(R.id.optName);
+      mOptEmail = (CheckBox) findViewById(R.id.optEmail);
       mOpen.setOnClickListener(this);
 
       // Gets info from preferences
@@ -92,6 +98,10 @@ public class MirandaDemo extends FragmentActivity implements OnClickListener {
                dialog.setTextEmail(true);
                break;
          }
+         if (mOptName.isChecked())
+            dialog.addField("Name");
+         if (mOptEmail.isChecked())
+            dialog.addField("Email");
          // displays the dialog
          dialog.show();
       }

@@ -1,80 +1,111 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
     tools:context=".MirandaDemo" >
 
-    <EditText
-        android:id="@+id/email"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="google email acct"
-        android:inputType="textEmailAddress" >
+        android:orientation="vertical" >
 
-        <requestFocus />
-    </EditText>
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="google email acct"
+            android:inputType="textEmailAddress" >
 
-    <EditText
-        android:id="@+id/password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/email"
-        android:ems="10"
-        android:hint="email password"
-        android:inputType="textPassword" />
+            <requestFocus />
+        </EditText>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Email Preference"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/email"
+            android:ems="10"
+            android:hint="email password"
+            android:inputType="textPassword" />
 
-    <RadioGroup
-        android:id="@+id/email_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-
-        <RadioButton
-            android:id="@+id/html"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="HTML" />
+            android:text="Email Preference"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <RadioButton
-            android:id="@+id/plain_text"
+        <RadioGroup
+            android:id="@+id/email_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+                android:id="@+id/html"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="HTML" />
+
+            <RadioButton
+                android:id="@+id/plain_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plain Text" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/send_feedback"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Plain Text" />
-    </RadioGroup>
-    
-    <Button
-        android:id="@+id/send_feedback"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
-        android:text="Open Feedback Dialog" />
+            android:layout_marginTop="17dp"
+            android:text="Open Feedback Dialog" />
 
-    <EditText
-        android:id="@+id/app_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="App Name"
-        android:inputType="textMultiLine" />
-    
-     <EditText
-        android:id="@+id/dialog_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Dialog Title"
-        android:inputType="textMultiLine" />
+        <EditText
+            android:id="@+id/app_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="App Name"
+            android:inputType="textMultiLine" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/dialog_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Dialog Title"
+            android:inputType="textMultiLine" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/custom_fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <CheckBox
+                android:id="@+id/optName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Optional Name Field" />
+
+            <CheckBox
+                android:id="@+id/optEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Optional Email Field" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>
