@@ -119,7 +119,7 @@ public class MirandaFeedback {
     * @param label The label for the new field.
     * @return
     */
-   public MirandaFeedback addEditText(String label) {
+   public MirandaFeedback addField(String label) {
       fields.add(label);
       return this;
    }
@@ -279,10 +279,11 @@ public class MirandaFeedback {
          StringBuilder body = new StringBuilder();
          String fieldLabel;
          String userInput;
-         String tableRowFormat = "<tr><td><b>%s</b></td><td>%s</td></tr>";
+         String tableRowFormat =
+            "<tr><td style='width: 25%; background: #efefef;'><b>%s</b></td><td>%s</td></tr>";
 
          // Builds body of the email
-         body.append("<table>");
+         body.append("<table style='width: 600px; border: 1px solid black;'>");
          body.append(String.format(tableRowFormat, "Feedback", feedback.getText().toString()));
          for (ViewGroup layout : viewFields) {
             fieldLabel = ((TextView) layout.getChildAt(FIELD_TEXT)).getText().toString();
