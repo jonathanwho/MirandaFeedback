@@ -16,20 +16,20 @@ import com.jonathanwho.mirandafeedback.R;
 
 public class MirandaDemo extends FragmentActivity implements OnClickListener {
 
-   Button mOpen;
-   EditText mEmail;
-   EditText mPassword;
-   RadioGroup mEmailType;
-
+   Button mOpen; // button that opens the dialog
+   EditText mEmail; // text field for google email account
+   EditText mPassword; // text field for google email account password
+   RadioGroup mEmailType; // radio button to determine email response type
    EditText mAppName;
    EditText mDialogTitle;
+   CheckBox mOptName; // adds an optional name field
+   CheckBox mOptEmail; // adds an optional email field
 
-   CheckBox mOptName;
-   CheckBox mOptEmail;
-
+   /* Error messages */
    private final String REQUIRED_FIELD = "This field is required.";
    private final String INVALID_EMAIL = "This is not a valid email";
 
+   /* Constants to use with getPreferences() */
    private final String GMAIL_ACCOUNT = "GMAIL_ACCOUNT";
    private final String GMAIL_PW = "GMAIL_PW";
    private final String APP_NAME = "APP_NAME";
@@ -82,28 +82,27 @@ public class MirandaDemo extends FragmentActivity implements OnClickListener {
          editor.commit();
 
          // Builds the MirandaFeedback dialog
-         MirandaFeedback dialog = new MirandaFeedback(MirandaDemo.this);
-         // setEmail is required (from email must be a gmail acct)
-         // for app simplicity we reuse the to/from emails
-         dialog.setEmail(email, password, "Feedback from MirandaFeedbackDemo", email);
-         // Sets app name
-         if (!appName.isEmpty())
+         // for app simplicity we reuse the to/from emails (2nd/4th parameters)
+         MirandaFeedback dialog =
+            new MirandaFeedback(MirandaDemo.this, email, password,
+               "Feedback from MirandaFeedbackDemo", email);
+
+         if (!appName.isEmpty()) // Sets app name in dialog title
             dialog.setAppName(appName);
-         // Replaces dialog title entirely
-         if (!dialogTitle.isEmpty())
+
+         if (!dialogTitle.isEmpty()) // Replaces dialog title entirely
             dialog.setDialogTitle(dialogTitle);
-         switch (mEmailType.getCheckedRadioButtonId()) {
-         // HTML by default
-            case R.id.plain_text:
-               dialog.setTextEmail(true);
-               break;
-         }
-         if (mOptName.isChecked())
+
+         if (mEmailType.getCheckedRadioButtonId() == R.id.plain_text)
+            dialog.setTextEmail(true); // HTML by default
+
+         if (mOptName.isChecked()) // Adds name field to dialog
             dialog.addField("Name");
-         if (mOptEmail.isChecked())
+
+         if (mOptEmail.isChecked()) // Adds email field to dialog
             dialog.addField("Email");
-         // displays the dialog
-         dialog.show();
+
+         dialog.show(); // displays the dialog
       }
    }
 }

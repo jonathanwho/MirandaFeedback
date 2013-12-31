@@ -65,17 +65,13 @@ public class MirandaFeedback {
    private final static String NEG_BUTTON_TXT = "Cancel";
 
    /** Gmail account information */
-   /** google email account username (include @gmail.com) */
-   private static String gmailUsername;
-   /** password */
+   private static String gmailFromEmail;
    private static String gmailPassword;
-   /** subject */
    private static String gmailSubject;
-   /** recipient */
-   private static String gmailRecipient;
+   private static String gmailRecipientEmail;
 
    /**
-    * Construct a new MirandaFeedback.
+    * Construct a new MirandaFeedback object.
     * @param context Context of the calling activity.
     */
    public MirandaFeedback(Context context) {
@@ -87,20 +83,24 @@ public class MirandaFeedback {
    }
 
    /**
-    * Sets the attributes for the gmail configuration.
-    * @param username Username of the gmail account (include @gmail.com)
+    * Construct a new MirandaFeedback object.
+    * @param context Context of the calling activity.
+    * @param fromEmail Gmail account (include @gmail.com)
     * @param password Password of the gmail account
     * @param subject Subject of the email
-    * @param recipient Email account that the feedback will be sent to
-    * @return 
+    * @param recipientEmail Recipient of the feedback response.
     */
-   public MirandaFeedback setEmail(String username, String password, String subject,
-      String recipient) {
-      gmailUsername = username;
+   public MirandaFeedback(Context context, String fromEmail, String password, String subject,
+      String recipientEmail) {
+      gmailFromEmail = fromEmail;
       gmailPassword = password;
       gmailSubject = subject;
-      gmailRecipient = recipient;
-      return this;
+      gmailRecipientEmail = recipientEmail;
+      fields = new ArrayList<String>();
+      positiveButtonText = POS_BUTTON_TXT;
+      negativeButtonText = NEG_BUTTON_TXT;
+      fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+      dialog = new FeedbackDialog();
    }
 
    /** 
@@ -115,9 +115,9 @@ public class MirandaFeedback {
    }
 
    /**
-    * Adds a new edit text field to the feedback field.
+    * Adds a new edit text field to the dialog.
     * @param label The label for the new field.
-    * @return
+    * @return This MirandaFeedback object to allow for chaining of calls to set methods.
     */
    public MirandaFeedback addField(String label) {
       fields.add(label);
@@ -127,7 +127,7 @@ public class MirandaFeedback {
    /**
     * Sets the text for the positive button.
     * @param positiveButtonText The text for the positive button.
-    * @return
+    * @return This MirandaFeedback object to allow for chaining of calls to set methods.
     */
    public MirandaFeedback setPositiveButtonText(String positiveButtonText) {
       this.positiveButtonText = positiveButtonText;
@@ -137,7 +137,7 @@ public class MirandaFeedback {
    /**
     * Sets the text for the negative button.
     * @param negativeButtonText The text for the negative button.
-    * @return
+    * @return This MirandaFeedback object to allow for chaining of calls to set methods.
     */
    public MirandaFeedback setNegativeButtonText(String negativeButtonText) {
       this.negativeButtonText = negativeButtonText;
@@ -147,7 +147,7 @@ public class MirandaFeedback {
    /**
     * Replaces the entire feedback dialog title.
     * @param dialogTitle The new title for the feedback dialog.
-    * @return
+    * @return This MirandaFeedback object to allow for chaining of calls to set methods.
     */
    public MirandaFeedback setDialogTitle(String dialogTitle) {
       this.dialogTitle = dialogTitle;
@@ -156,8 +156,8 @@ public class MirandaFeedback {
 
    /**
     * Determines how to send the feedback email to |gmailRecipient|.
-    * @param textEmail If true, feedback email is sent via plain text. HTML otherwise.
-    * @return
+    * @param textEmail If true, email is sent via plain text. HTML otherwise.
+    * @return This MirandaFeedback object to allow for chaining of calls to set methods.
     */
    public MirandaFeedback setTextEmail(boolean textEmail) {
       this.textEmail = textEmail;
@@ -166,13 +166,8 @@ public class MirandaFeedback {
 
    /**
     * Sets arguments and displays the feedback dialog.
-    * @throws MirandaNoEmailException
     */
-   public void show() throws MirandaNoEmailException {
-      if (gmailUsername == null || gmailPassword == null || gmailSubject == null
-         || gmailRecipient == null) {
-         throw new MirandaNoEmailException();
-      }
+   public void show() {
       Bundle arguments = new Bundle();
       arguments.putString(APP_NAME, appName);
       arguments.putString(POS_BUTTON, positiveButtonText);
@@ -347,9 +342,9 @@ public class MirandaFeedback {
 
             @Override
             protected Boolean doInBackground(String... subject) {
-               GmailSender sender = new GmailSender(gmailUsername, gmailPassword, textEmail);
+               GmailSender sender = new GmailSender(gmailFromEmail, gmailPassword, textEmail);
                try {
-                  sender.sendMail(gmailSubject, subject[0], gmailUsername, gmailRecipient);
+                  sender.sendMail(gmailSubject, subject[0], gmailFromEmail, gmailRecipientEmail);
                   return true;
                } catch (Exception e) {
                   e.printStackTrace();
@@ -399,25 +394,23 @@ public class MirandaFeedback {
     * MirandaNoEmailException is thrown when 
     * {@link MirandaFeedback#setEmail(String, String, String, String)} is not
     * called or it's paramters are invalid.  
-    * @author jmiranda
-    *
     */
-   public class MirandaNoEmailException extends RuntimeException {
+   public class MirandaInvalidEmailException extends RuntimeException {
       private static final long serialVersionUID = -9223012931688847972L;
 
-      public MirandaNoEmailException() {
+      public MirandaInvalidEmailException() {
          super();
       }
 
-      public MirandaNoEmailException(String message) {
+      public MirandaInvalidEmailException(String message) {
          super(message);
       }
 
-      public MirandaNoEmailException(String message, Throwable cause) {
+      public MirandaInvalidEmailException(String message, Throwable cause) {
          super(message, cause);
       }
 
-      public MirandaNoEmailException(Throwable cause) {
+      public MirandaInvalidEmailException(Throwable cause) {
          super(cause);
       }
    }
