@@ -73,18 +73,6 @@ public class MirandaFeedback {
    /**
     * Construct a new MirandaFeedback object.
     * @param context Context of the calling activity.
-    */
-   public MirandaFeedback(Context context) {
-      this.fields = new ArrayList<String>();
-      this.positiveButtonText = POS_BUTTON_TXT;
-      this.negativeButtonText = NEG_BUTTON_TXT;
-      this.fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
-      this.dialog = new FeedbackDialog();
-   }
-
-   /**
-    * Construct a new MirandaFeedback object.
-    * @param context Context of the calling activity.
     * @param fromEmail Gmail account (include @gmail.com)
     * @param password Password of the gmail account
     * @param subject Subject of the email
